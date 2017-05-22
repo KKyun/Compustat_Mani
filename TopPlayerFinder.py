@@ -1,23 +1,27 @@
 import pandas as pd
-import numpy as np
 
 Result = []
+CustomRange = 5
+StartingYear = 1970
+EndYear = 2010
 
 Filename = r".xlsx"
 
 df = pd.read_excel(Filename)
+df.dropna(inplace = True)
 
-MinYear = df['Year'].min()
-MaxYear = df['Year'].max()
-for year in range(MinYear, MaxYear+1):
-    dfTemp = df[df['Year'] == year]
-    dfTemp['Rank'] = s['Revenue'].rank(ascending=False)
-    try:
-        Result.append({'Year':year, '1st':dfTemp[dfTemp['Rank'] == 1]['Company_Name'][0],
-                       '2nd':dfTemp[dfTemp['Rank'] == 2]['Company_Name'][0],
-                       '3rd':dfTemp[dfTemp['Rank'] == 3]['Company_Name'][0],
-                       '4th':dfTemp[dfTemp['Rank'] == 4]['Company_Name'][0],
-                       '5th':dfTemp[dfTemp['Rank'] == 5]['Company_Name'][0]})
-     
-df = pd.DataFrame(Result, columns=['Year','1st','2nd','3rd', '4th', '5th'])
-print(result)
+df["rank"] = df.groupby("Year")["Revenue"].rank(ascending=False)
+df = df[df["rank"]<=CustomRange]
+df = df[df["Year"]>=StartingYear]
+df = df[df["Year"]<=EndYear]
+
+dfList = df['Ticker_Symbol'].tolist()
+dfList = list(set(dfList))
+
+for tickers in range(0, len(dfList)):
+    Result.append({'Ticker':dfList[tickers],'Count':df[df["Ticker_Symbol"]==dfList[tickers]]["Ticker_Symbol"].count()})
+df2 = pd.DataFrame(Result, columns=['Ticker', 'Count'])
+df2.sort_values(['Count'], ascending=[False], inplace=True)
+
+print(df2)
+print("The result is from Year "+str(StartingYear)+" to "+str(EndYear)+" which is "+str(EndYear-StartingYear+1)+" Years Long")
